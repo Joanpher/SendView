@@ -305,6 +305,7 @@ export function DashboardContent({ applications: initialApplications, user }: Da
                   applications={applications}
                   onApplicationDeleted={handleApplicationDeleted}
                   onApplicationUpdated={handleApplicationUpdated}
+                  hideApiKey
                 />
               </CardContent>
             </Card>

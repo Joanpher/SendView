@@ -34,9 +34,10 @@ interface ApplicationsListProps {
   applications: Application[]
   onApplicationDeleted: (id: string) => void
   onApplicationUpdated?: (app: Application) => void
+  hideApiKey?: boolean
 }
 
-export function ApplicationsList({ applications, onApplicationDeleted, onApplicationUpdated }: ApplicationsListProps) {
+export function ApplicationsList({ applications, onApplicationDeleted, onApplicationUpdated, hideApiKey }: ApplicationsListProps) {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
   const [editingApp, setEditingApp] = useState<Application | null>(null)
   const [editName, setEditName] = useState("")
@@ -127,36 +128,40 @@ export function ApplicationsList({ applications, onApplicationDeleted, onApplica
                 <Badge variant={app.is_active ? "default" : "secondary"}>{app.is_active ? "Activa" : "Inactiva"}</Badge>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">API Key:</p>
-                <div className="flex items-center gap-2">
-                  <code className="text-sm bg-muted px-2 py-1 rounded flex-1">
-                    {visibleKeys.has(app.id) ? app.api_key : "••••••••••••••••••••••••••••••••"}
-                  </code>
-                  <Button variant="ghost" size="sm" onClick={() => toggleKeyVisibility(app.id)}>
-                    {visibleKeys.has(app.id) ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(app.api_key)}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              {!hideApiKey && (
+                <>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">API Key:</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm bg-muted px-2 py-1 rounded flex-1">
+                        {visibleKeys.has(app.id) ? app.api_key : "••••••••••••••••••••••••••••••••"}
+                      </code>
+                      <Button variant="ghost" size="sm" onClick={() => toggleKeyVisibility(app.id)}>
+                        {visibleKeys.has(app.id) ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => copyToClipboard(app.api_key)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
 
-              <div className="space-y-1 mt-3">
-                <p className="text-sm text-muted-foreground">URL de integración (ingesta directa):</p>
-                <div className="flex items-center gap-2">
-                  <code className="text-xs bg-muted px-2 py-1 rounded flex-1 truncate">
-                    {`/api/ingest?api_key=${app.api_key}`}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(`/api/ingest?api_key=${app.api_key}`)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+                  <div className="space-y-1 mt-3">
+                    <p className="text-sm text-muted-foreground">URL de integración (ingesta directa):</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs bg-muted px-2 py-1 rounded flex-1 truncate">
+                        {`/api/ingest?api_key=${app.api_key}`}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(`/api/ingest?api_key=${app.api_key}`)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
 
               {app.webhook_url && (
                 <div className="space-y-1">
