@@ -36,13 +36,8 @@ interface ApplicationsListProps {
   onApplicationUpdated?: (app: Application) => void
 }
 
-function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
-
 export function ApplicationsList({ applications, onApplicationDeleted, onApplicationUpdated }: ApplicationsListProps) {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set())
-  const [regeneratingId, setRegeneratingId] = useState<string | null>(null)
   const [editingApp, setEditingApp] = useState<Application | null>(null)
   const [editName, setEditName] = useState("")
   const [editWebhookUrl, setEditWebhookUrl] = useState("")
@@ -112,39 +107,6 @@ export function ApplicationsList({ applications, onApplicationDeleted, onApplica
     }
   }
 
-  const regenerateApiKey = async (id: string) => {
-    if (!id || id === "undefined" || !isUuid(id)) {
-      console.error("Error regenerando API Key: applicationId inválido", { id })
-      return
-    }
-    try {
-      setRegeneratingId(id)
-
-      const response = await fetch(`/api/applications/${id}/regenerate-key`, {
-        method: "POST",
-      })
-
-      const data = await response.json()
-
-      if (!response.ok || !data.ok) {
-        console.error("Error regenerando API Key:", data?.error || data)
-        return
-      }
-
-      if (onApplicationUpdated) {
-        onApplicationUpdated(data.application as Application)
-      }
-
-      setVisibleKeys((prev) => {
-        const next = new Set(prev)
-        next.add(id)
-        return next
-      })
-    } finally {
-      setRegeneratingId(null)
-    }
-  }
-
   if (applications.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -176,14 +138,6 @@ export function ApplicationsList({ applications, onApplicationDeleted, onApplica
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(app.api_key)}>
                     <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => regenerateApiKey(app.id)}
-                    disabled={regeneratingId === app.id || !app.id || !isUuid(app.id)}
-                  >
-                    {regeneratingId === app.id ? "Regenerando..." : "Regenerar API Key"}
                   </Button>
                 </div>
               </div>
