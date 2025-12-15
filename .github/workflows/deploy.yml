@@ -21,6 +21,7 @@ jobs:
             --exclude='node_modules' \
             --exclude='.next' \
             --exclude='.env.local' \
+            --exclude='source.tar.gz' \
             .
 
       - name: Setup SSH
