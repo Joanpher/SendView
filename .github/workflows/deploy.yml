@@ -14,29 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'  # Specify your Node.js version
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Next.js application
-        run: npm run build
-        env:
-          NODE_ENV: production
-
-      - name: Create deployment archive
+      - name: Create source archive
         run: |
-          tar -czf deployment.tar.gz \
-            .next \
-            package.json \
-            package-lock.json \
-            next.config.mjs \
-            public \
-            node_modules
+          tar -czf source.tar.gz \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='.env.local' \
+            .
 
       - name: Setup SSH
         run: |
@@ -47,8 +32,8 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          # Transfer deployment archive
-          scp -i ~/.ssh/id_rsa deployment.tar.gz ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/
+          # Transfer source archive
+          scp -i ~/.ssh/id_rsa source.tar.gz ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/
 
           # Execute deployment commands on EC2
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
@@ -57,12 +42,17 @@ jobs:
             # Navigate to application directory
             cd /var/www/wordnoticenter.com
             
-            # Extract deployment archive
-            tar -xzf /tmp/deployment.tar.gz
-            rm /tmp/deployment.tar.gz
+            # Extract source archive
+            tar -xzf /tmp/source.tar.gz
+            rm /tmp/source.tar.gz
             
-            # Install/update dependencies (if needed)
-            npm ci --production
+            # Install dependencies
+            echo "Installing dependencies..."
+            npm ci
+            
+            # Build Next.js application
+            echo "Building Next.js application..."
+            NODE_ENV=production npm run build
             
             # Restart application with PM2
             if pm2 describe wordnoticenter > /dev/null 2>&1; then
@@ -88,4 +78,4 @@ jobs:
         if: always()
         run: |
           rm -f ~/.ssh/id_rsa
-          rm -f deployment.tar.gz
+          rm -f source.tar.gz
