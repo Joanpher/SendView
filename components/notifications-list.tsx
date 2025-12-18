@@ -19,6 +19,7 @@ export function NotificationsList({ applications }: NotificationsListProps) {
   const [filterApp, setFilterApp] = useState<string>("all")
   const [filterType, setFilterType] = useState<string>("all")
   const [filterRead, setFilterRead] = useState<string>("all")
+  const limit = 20
 
   useEffect(() => {
     loadNotifications()
@@ -43,7 +44,7 @@ export function NotificationsList({ applications }: NotificationsListProps) {
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(100)
+      .limit(limit)
 
     if (filterApp !== "all") {
       query = query.eq("app_id", filterApp)

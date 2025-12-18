@@ -2,6 +2,14 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { sendNotificationEmail } from "@/lib/email"
 
+ function mergeDashboardOrigin(data: unknown) {
+  const base = data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, any>) : {}
+  return {
+    ...base,
+    _wnc_origin: "dashboard",
+  }
+ }
+
 type RecipientInput = {
   user_id: string
   email?: string
@@ -102,6 +110,8 @@ export async function POST(request: Request) {
         for (let i = 0; i < appUsers.length; i += INSERT_BATCH_SIZE) {
           const chunk = appUsers.slice(i, i + INSERT_BATCH_SIZE)
 
+          const mergedData = mergeDashboardOrigin(data)
+
           const notificationsToInsert = chunk.map((u) => ({
             app_id,
             user_id: u.external_user_id,
@@ -109,7 +119,7 @@ export async function POST(request: Request) {
             message,
             type,
             priority,
-            data,
+            data: mergedData,
             expires_at: expires_at || null,
           }))
 
@@ -209,10 +219,10 @@ export async function POST(request: Request) {
       notification_id?: string
       inserted: boolean
       emailed: boolean
+      error?: string
       email_error?: string
       webhook_sent?: boolean
       webhook_error?: string
-      error?: string
     }> = []
 
     for (const r of resolvedRecipients) {
@@ -227,7 +237,9 @@ export async function POST(request: Request) {
       let resolvedEmail: string | undefined = email
 
       if (email) {
-        await supabase.from("app_users").upsert({ app_id, external_user_id: user_id, email }, { onConflict: "app_id,external_user_id" })
+        await supabase
+          .from("app_users")
+          .upsert({ app_id, external_user_id: user_id, email }, { onConflict: "app_id,external_user_id" })
       } else {
         const { data: mapped } = await supabase
           .from("app_users")
@@ -239,6 +251,8 @@ export async function POST(request: Request) {
         resolvedEmail = mapped?.email || undefined
       }
 
+      const mergedData = mergeDashboardOrigin(data)
+
       const { data: notification, error: insertError } = await supabase
         .from("notifications")
         .insert({
@@ -248,14 +262,20 @@ export async function POST(request: Request) {
           message,
           type,
           priority,
-          data,
+          data: mergedData,
           expires_at: expires_at || null,
         })
         .select("id")
         .single()
 
       if (insertError || !notification) {
-        results.push({ user_id, email: resolvedEmail, inserted: false, emailed: false, error: insertError?.message || "Error insertando" })
+        results.push({
+          user_id,
+          email: resolvedEmail,
+          inserted: false,
+          emailed: false,
+          error: insertError?.message || "Error insertando",
+        })
         continue
       }
 
@@ -281,7 +301,7 @@ export async function POST(request: Request) {
                 message,
                 type,
                 priority,
-                data,
+                data: mergedData,
                 expires_at: expires_at || null,
               },
             }),
@@ -305,7 +325,6 @@ export async function POST(request: Request) {
           })
           emailed = true
         } catch (emailError: unknown) {
-          emailed = false
           results.push({
             user_id,
             email: resolvedEmail,

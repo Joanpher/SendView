@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -8,11 +8,12 @@ import { ApplicationsList } from "@/components/applications-list"
 import { NotificationsList } from "@/components/notifications-list"
 import { SendNotificationForm } from "@/components/send-notification-form"
 import { CreateApplicationDialog } from "@/components/create-application-dialog"
-import { Bell, Package, Settings, LogOut } from "lucide-react"
+import { Bell, Package, Settings, LogOut, Activity } from "lucide-react"
 import type { Application } from "@/lib/types"
 import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
 import { Input } from "@/components/ui/input"
+import { ActivityLogList } from "@/components/activity-log-list"
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ interface DashboardContentProps {
 export function DashboardContent({ applications: initialApplications, user }: DashboardContentProps) {
   const [applications, setApplications] = useState(initialApplications)
   const [activeTab, setActiveTab] = useState("applications")
+  const [mounted, setMounted] = useState(false)
   const [displayName, setDisplayName] = useState<string>(
     ((user as any).user_metadata?.full_name as string) ||
       ((user as any).user_metadata?.name as string) ||
@@ -45,6 +47,10 @@ export function DashboardContent({ applications: initialApplications, user }: Da
   const [savingPassword, setSavingPassword] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -246,70 +252,52 @@ export function DashboardContent({ applications: initialApplications, user }: Da
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="applications">Mis Aplicaciones</TabsTrigger>
-            <TabsTrigger value="notifications">Notificaciones</TabsTrigger>
-            <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-            <TabsTrigger value="profile">Perfil</TabsTrigger>
-          </TabsList>
+        {mounted ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
+              <TabsTrigger value="applications" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Mis Aplicaciones
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Notificaciones
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Actividad
+              </TabsTrigger>
+              <TabsTrigger value="api-keys" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                API Keys
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Perfil
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="applications" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
+            <TabsContent value="applications" className="space-y-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Aplicaciones</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{applications.length}</div>
-                  <p className="text-xs text-muted-foreground">Aplicaciones registradas</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Aplicaciones Activas</CardTitle>
-                  <Settings className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{applications.filter((app) => app.is_active).length}</div>
-                  <p className="text-xs text-muted-foreground">En funcionamiento</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">API Keys</CardTitle>
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{applications.length}</div>
-                  <p className="text-xs text-muted-foreground">Claves generadas</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Aplicaciones Integradas</CardTitle>
-                    <CardDescription>Gestiona las aplicaciones que envían notificaciones</CardDescription>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Mis Aplicaciones</CardTitle>
+                      <CardDescription>Gestiona las aplicaciones que envían notificaciones</CardDescription>
+                    </div>
+                    <CreateApplicationDialog onApplicationCreated={handleApplicationCreated} />
                   </div>
-                  <CreateApplicationDialog onApplicationCreated={handleApplicationCreated} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ApplicationsList
-                  applications={applications}
-                  onApplicationDeleted={handleApplicationDeleted}
-                  onApplicationUpdated={handleApplicationUpdated}
-                  hideApiKey
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </CardHeader>
+                <CardContent>
+                  <ApplicationsList
+                    applications={applications}
+                    onApplicationDeleted={handleApplicationDeleted}
+                    onApplicationUpdated={handleApplicationUpdated}
+                    hideApiKey
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
           <TabsContent value="notifications" className="space-y-4">
             <SendNotificationForm
@@ -317,13 +305,23 @@ export function DashboardContent({ applications: initialApplications, user }: Da
               onSent={() => {
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="activity" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Historial de Notificaciones</CardTitle>
-                <CardDescription>Todas las notificaciones recibidas</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Actividad</CardTitle>
+                    <CardDescription>
+                      Últimas notificaciones recibidas por tus aplicaciones.
+                    </CardDescription>
+                  </div>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </div>
               </CardHeader>
               <CardContent>
-                <NotificationsList applications={applications} />
+                <ActivityLogList applications={applications} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -415,7 +413,10 @@ export function DashboardContent({ applications: initialApplications, user }: Da
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+      ) : (
+        <div className="py-8 text-center text-muted-foreground">Cargando...</div>
+      )}
       </main>
     </div>
   )
