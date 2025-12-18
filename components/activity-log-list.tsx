@@ -126,7 +126,7 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
                   <TableRow key={n.id}>
                     <TableCell>{new Date(n.created_at).toLocaleString()}</TableCell>
                     <TableCell>{appNameById.get(n.app_id) || "Desconocida"}</TableCell>
-                    <TableCell className="font-mono text-xs">{n.user_id}</TableCell>
+                    <TableCell className="font-mono text-xs">{n.user_email || n.user_id}</TableCell>
                     <TableCell>{n.title}</TableCell>
                     <TableCell>{n.type}</TableCell>
                     <TableCell>{n.priority}</TableCell>

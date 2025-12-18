@@ -80,7 +80,38 @@ export async function GET(request: Request) {
       return !isOut
     })
 
-    return NextResponse.json({ ok: true, notifications: filtered.slice(0, limit) }, { status: 200 })
+    const sliced = filtered.slice(0, limit)
+
+    const userPairs = sliced
+      .map((n: any) => ({ app_id: n?.app_id as string | undefined, user_id: n?.user_id as string | undefined }))
+      .filter((p) => Boolean(p.app_id) && Boolean(p.user_id)) as Array<{ app_id: string; user_id: string }>
+
+    const appIdsForUsers = Array.from(new Set(userPairs.map((p) => p.app_id)))
+    const userIdsForUsers = Array.from(new Set(userPairs.map((p) => p.user_id)))
+
+    const emailByAppAndUser = new Map<string, string>()
+
+    if (appIdsForUsers.length > 0 && userIdsForUsers.length > 0) {
+      const { data: appUsers } = await supabase
+        .from("app_users")
+        .select("app_id,external_user_id,email")
+        .in("app_id", appIdsForUsers)
+        .in("external_user_id", userIdsForUsers)
+
+      for (const u of appUsers || []) {
+        if (u?.email) {
+          emailByAppAndUser.set(`${u.app_id}::${u.external_user_id}`, u.email)
+        }
+      }
+    }
+
+    const enriched = sliced.map((n: any) => {
+      const key = `${n.app_id}::${n.user_id}`
+      const user_email = emailByAppAndUser.get(key)
+      return user_email ? { ...n, user_email } : n
+    })
+
+    return NextResponse.json({ ok: true, notifications: enriched }, { status: 200 })
   } catch (error: unknown) {
     return NextResponse.json(
       {

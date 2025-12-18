@@ -2,6 +2,7 @@ export interface Notification {
   id: string
   app_id: string
   user_id: string
+  user_email?: string
   title: string
   message: string
   type: "info" | "success" | "warning" | "error"
