@@ -16,13 +16,10 @@ jobs:
 
       - name: Create source archive
         run: |
-          tar -czf source.tar.gz \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='.next' \
-            --exclude='.env.local' \
-            --exclude='source.tar.gz' \
-            .
+          git ls-files -z -- \
+            ':(exclude).env.local' \
+            ':(exclude)source.tar.gz' \
+            | tar --null -T - -czf source.tar.gz
 
       - name: Setup SSH
         run: |
