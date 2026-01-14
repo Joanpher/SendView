@@ -16,9 +16,10 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const app_id = url.searchParams.get("app_id")
     const limitRaw = url.searchParams.get("limit")
-    const limit = Math.min(Math.max(Number.parseInt(limitRaw || "50"), 1), 200)
+    const limit = Math.min(Math.max(Number.parseInt(limitRaw || "50"), 1), 500)
     const flow = (url.searchParams.get("flow") || "in").toLowerCase()
     const type = (url.searchParams.get("type") || "").toLowerCase()
+    const user_email = url.searchParams.get("user_email") || ""
 
     const { data: applications, error: appsError } = await supabase
       .from("applications")
@@ -39,7 +40,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: "Aplicación no encontrada o sin acceso" }, { status: 404 })
     }
 
-    const fetchLimit = Math.min(Math.max(limit * 3, limit), 200)
+    const fetchLimit = Math.min(Math.max(limit * 3, limit), 500)
+
+    let userIdsToFilter: string[] = []
+    if (user_email) {
+      const { data: matchingUsers } = await supabase
+        .from("app_users")
+        .select("external_user_id, app_id")
+        .in("app_id", app_id ? [app_id] : appIds)
+        .ilike("email", `%${user_email}%`)
+
+      userIdsToFilter = (matchingUsers || []).map((u) => u.external_user_id)
+      if (userIdsToFilter.length === 0) {
+        return NextResponse.json({ ok: true, notifications: [] }, { status: 200 })
+      }
+    }
 
     let query = supabase
       .from("notifications")
@@ -50,6 +65,10 @@ export async function GET(request: Request) {
 
     if (type) {
       query = query.ilike("type", type)
+    }
+
+    if (userIdsToFilter.length > 0) {
+      query = query.in("user_id", userIdsToFilter)
     }
 
     const { data: notifications, error: notificationsError } = await query
