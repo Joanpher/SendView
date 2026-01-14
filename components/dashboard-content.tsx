@@ -254,7 +254,7 @@ export function DashboardContent({ applications: initialApplications, user }: Da
       <main className="container mx-auto px-4 py-8">
         {mounted ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
+            <TabsList className="grid w-full grid-cols-5 lg:w-[800px] gap-2">
               <TabsTrigger value="applications" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Mis Aplicaciones

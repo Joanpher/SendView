@@ -26,6 +26,8 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
   const [selectedUser, setSelectedUser] = useState<{ email: string; userId: string } | null>(null)
   const [userHistory, setUserHistory] = useState<Notification[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
+  const [historyDateFrom, setHistoryDateFrom] = useState<string>("")
+  const [historyDateTo, setHistoryDateTo] = useState<string>("")
 
   const appNameById = useMemo(() => {
     const m = new Map<string, string>()
@@ -75,7 +77,7 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
     setEmailSearch("")
   }
 
-  const loadUserHistory = async (email: string, userId: string) => {
+  const loadUserHistory = async (email: string, userId: string, dateFrom?: string, dateTo?: string) => {
     setSelectedUser({ email, userId })
     setLoadingHistory(true)
     try {
@@ -83,6 +85,8 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
       qs.set("user_email", email)
       qs.set("flow", "all")
       qs.set("limit", "500")
+      if (dateFrom) qs.set("date_from", dateFrom)
+      if (dateTo) qs.set("date_to", dateTo)
 
       const res = await fetch(`/api/dashboard/activity?${qs.toString()}`, {
         method: "GET",
@@ -101,6 +105,18 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
     } finally {
       setLoadingHistory(false)
     }
+  }
+
+  const applyHistoryDateFilter = () => {
+    if (!selectedUser) return
+    loadUserHistory(selectedUser.email, selectedUser.userId, historyDateFrom || undefined, historyDateTo || undefined)
+  }
+
+  const clearHistoryDateFilter = () => {
+    setHistoryDateFrom("")
+    setHistoryDateTo("")
+    if (!selectedUser) return
+    loadUserHistory(selectedUser.email, selectedUser.userId)
   }
 
   if (loading) {
@@ -226,8 +242,17 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
         </>
       )}
 
-      <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+      <Dialog
+        open={!!selectedUser}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedUser(null)
+            setHistoryDateFrom("")
+            setHistoryDateTo("")
+          }
+        }}
+      >
+        <DialogContent className="w-[99vw] max-w-none max-h-[92vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
@@ -237,6 +262,27 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
               Actividad completa de <span className="font-mono bg-muted px-2 py-1 rounded">{selectedUser?.email}</span>
             </DialogDescription>
           </DialogHeader>
+
+          <div className="flex gap-3 flex-wrap items-end">
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Desde</div>
+              <Input value={historyDateFrom} onChange={(e) => setHistoryDateFrom(e.target.value)} type="date" className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground">Hasta</div>
+              <Input value={historyDateTo} onChange={(e) => setHistoryDateTo(e.target.value)} type="date" className="h-8" />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="secondary" onClick={applyHistoryDateFilter}>
+                Aplicar
+              </Button>
+              {(historyDateFrom || historyDateTo) && (
+                <Button size="sm" variant="ghost" onClick={clearHistoryDateFilter}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
           
           <div className="flex-1 overflow-auto">
             {loadingHistory ? (
@@ -265,7 +311,7 @@ export function ActivityLogList({ applications }: ActivityLogListProps) {
                         <TableCell className="whitespace-nowrap">{new Date(n.created_at).toLocaleString()}</TableCell>
                         <TableCell>{appNameById.get(n.app_id) || "Desconocida"}</TableCell>
                         <TableCell className="font-medium">{n.title}</TableCell>
-                        <TableCell className="max-w-[200px] truncate" title={n.message}>{n.message}</TableCell>
+                        <TableCell className="max-w-[520px] whitespace-normal break-words" title={n.message}>{n.message}</TableCell>
                         <TableCell>
                           <Badge variant={n.type === "error" ? "destructive" : n.type === "warning" ? "secondary" : "default"}>
                             {n.type}

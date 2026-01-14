@@ -20,6 +20,21 @@ export async function GET(request: Request) {
     const flow = (url.searchParams.get("flow") || "in").toLowerCase()
     const type = (url.searchParams.get("type") || "").toLowerCase()
     const user_email = url.searchParams.get("user_email") || ""
+    const date_from = url.searchParams.get("date_from") || ""
+    const date_to = url.searchParams.get("date_to") || ""
+
+    const parseDateBound = (value: string, bound: "start" | "end") => {
+      const trimmed = value.trim()
+      if (!trimmed) return undefined
+      const d = new Date(trimmed)
+      if (Number.isNaN(d.getTime())) return undefined
+      if (bound === "start") d.setHours(0, 0, 0, 0)
+      if (bound === "end") d.setHours(23, 59, 59, 999)
+      return d.toISOString()
+    }
+
+    const fromISO = parseDateBound(date_from, "start")
+    const toISO = parseDateBound(date_to, "end")
 
     const { data: applications, error: appsError } = await supabase
       .from("applications")
@@ -69,6 +84,14 @@ export async function GET(request: Request) {
 
     if (userIdsToFilter.length > 0) {
       query = query.in("user_id", userIdsToFilter)
+    }
+
+    if (fromISO) {
+      query = query.gte("created_at", fromISO)
+    }
+
+    if (toISO) {
+      query = query.lte("created_at", toISO)
     }
 
     const { data: notifications, error: notificationsError } = await query
