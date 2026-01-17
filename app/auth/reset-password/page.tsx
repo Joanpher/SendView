@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { Bell } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Bell, Loader2 } from "lucide-react"
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("")
@@ -18,7 +18,41 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSessionLoading, setIsSessionLoading] = useState(true)
+  const [hasSession, setHasSession] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setHasSession(true)
+        setIsSessionLoading(false)
+      }
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "PASSWORD_RECOVERY" || session) {
+          setHasSession(true)
+          setIsSessionLoading(false)
+        }
+      }
+    )
+
+    checkSession()
+
+    const timeout = setTimeout(() => {
+      setIsSessionLoading(false)
+    }, 3000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
+  }, [])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,7 +97,23 @@ export default function ResetPasswordPage() {
               <CardDescription>Ingresa tu nueva contraseña</CardDescription>
             </CardHeader>
             <CardContent>
-              {success ? (
+              {isSessionLoading ? (
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Verificando sesión...</p>
+                </div>
+              ) : !hasSession ? (
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm text-destructive">
+                    El enlace de recuperación ha expirado o es inválido. Por favor solicita un nuevo enlace.
+                  </p>
+                  <Link href="/auth/forgot-password">
+                    <Button variant="outline" className="w-full">
+                      Solicitar nuevo enlace
+                    </Button>
+                  </Link>
+                </div>
+              ) : success ? (
                 <div className="flex flex-col gap-4">
                   <p className="text-sm text-green-600">
                     Tu contraseña ha sido actualizada correctamente. Serás redirigido al inicio de sesión...
