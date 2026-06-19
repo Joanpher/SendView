@@ -48,7 +48,7 @@ export function DashboardContent({ applications: initialApplications, user }: Da
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push("/auth/login")
+    router.push("/")
   }
 
   const handleApplicationCreated = (newApp: Application) => setApplications([newApp, ...applications])

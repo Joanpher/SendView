@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Code, Zap } from "lucide-react"
+import { Code, Zap, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { NotiLogo } from "@/components/noti-logo"
@@ -13,10 +13,16 @@ export default function DocsPage() {
       <header className="sticky top-0 z-10 border-b border-border/50 backdrop-blur-md bg-card/60">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5">
-              <NotiLogo size="sm" />
-              <span className="font-bold text-base">SendView</span>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Inicio</span>
+              </Link>
+              <Link href="/" className="flex items-center gap-2.5">
+                <NotiLogo size="sm" />
+                <span className="font-bold text-base">SendView</span>
+              </Link>
+            </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Link href="/auth/login">

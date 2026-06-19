@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { NotiLogo } from "@/components/noti-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { ArrowRight, Check } from "lucide-react"
+import { ArrowRight, ArrowLeft, Check } from "lucide-react"
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
@@ -81,9 +81,15 @@ export default function SignUpPage() {
       {/* Panel izquierdo — formulario */}
       <div className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-6">
-          <div className="flex items-center gap-2">
-            <NotiLogo size="sm" />
-            <span className="font-bold">SendView</span>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Inicio</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <NotiLogo size="sm" />
+              <span className="font-bold">SendView</span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
