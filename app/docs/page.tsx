@@ -1,25 +1,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bell, Code, Zap } from "lucide-react"
+import { Code, Zap } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { NotiLogo } from "@/components/noti-logo"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-10 border-b border-border/50 backdrop-blur-md bg-card/60">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <Bell className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold">Centro de Notificaciones</h1>
+            <Link href="/" className="flex items-center gap-2.5">
+              <NotiLogo size="sm" />
+              <span className="font-bold text-base">SendView</span>
             </Link>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Link href="/auth/login">
-                <Button variant="outline" size="sm">
-                  Iniciar Sesión
-                </Button>
+                <Button variant="outline" size="sm">Iniciar Sesión</Button>
               </Link>
             </div>
           </div>
@@ -30,7 +31,7 @@ export default function DocsPage() {
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4">Documentación de API</h1>
           <p className="text-xl text-muted-foreground">
-            Aprende cómo integrar el Centro de Notificaciones en tu aplicación
+            Aprende cómo integrar SendView en tu aplicación
           </p>
         </div>
 
@@ -55,7 +56,7 @@ export default function DocsPage() {
                 <div>
                   <h3 className="font-semibold mb-2">1. Crea una cuenta</h3>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Regístrate en el Centro de Notificaciones y crea tu primera aplicación desde el dashboard.
+                    Regístrate en SendView y crea tu primera aplicación desde el dashboard.
                   </p>
                   <Link href="/auth/sign-up">
                     <Button size="sm">Crear Cuenta</Button>
