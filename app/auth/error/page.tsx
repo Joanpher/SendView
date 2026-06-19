@@ -1,37 +1,38 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertCircle, Bell } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { NotiLogo } from "@/components/noti-logo"
+import { AlertCircle, ArrowLeft } from "lucide-react"
 
 export default async function AuthErrorPage({ searchParams }: { searchParams: Promise<{ error: string }> }) {
   const params = await searchParams
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gradient-to-b from-background to-muted">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Bell className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Centro de Notificaciones</h1>
-          </div>
-          <Card>
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <AlertCircle className="h-16 w-16 text-destructive" />
-              </div>
-              <CardTitle className="text-2xl">Error de Autenticación</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              {params?.error ? (
-                <p className="text-sm text-muted-foreground mb-6">Código de error: {params.error}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground mb-6">Ocurrió un error durante la autenticación.</p>
-              )}
-              <Link href="/auth/login">
-                <Button>Volver al Inicio de Sesión</Button>
-              </Link>
-            </CardContent>
-          </Card>
+    <div className="min-h-svh flex flex-col items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md text-center space-y-8">
+        <NotiLogo size="lg" className="mx-auto" />
+
+        <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+          <AlertCircle className="h-10 w-10 text-destructive" />
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Error de autenticación</h1>
+          <p className="text-muted-foreground text-sm">
+            {params?.error
+              ? `Código de error: ${params.error}`
+              : "Ocurrió un problema durante la autenticación. Por favor intenta de nuevo."}
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/auth/login">
+            <Button className="gap-2 w-full sm:w-auto">
+              <ArrowLeft className="h-4 w-4" />Volver al inicio de sesión
+            </Button>
+          </Link>
+          <Link href="/auth/sign-up">
+            <Button variant="outline" className="w-full sm:w-auto">Crear cuenta</Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -153,6 +153,7 @@ export async function POST(request: Request) {
                   title,
                   message,
                   appName: application.name,
+                  type,
                 })
                 emailed_count += 1
               } catch {
@@ -322,6 +323,7 @@ export async function POST(request: Request) {
             title,
             message,
             appName: application.name,
+            type,
           })
           emailed = true
         } catch (emailError: unknown) {

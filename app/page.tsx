@@ -1,151 +1,144 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bell, Zap, Shield, Code, ArrowRight } from "lucide-react"
+import { Zap, Shield, Code, ArrowRight, Send, Activity, Bell } from "lucide-react"
+import { NotiLogo } from "@/components/noti-logo"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold">Centro de Notificaciones</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/auth/login">
-                <Button variant="ghost">Iniciar Sesión</Button>
-              </Link>
-              <Link href="/auth/sign-up">
-                <Button>Comenzar</Button>
-              </Link>
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col">
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-border/40 backdrop-blur-sm bg-card/30 sticky top-0 z-10">
+        <div className="flex items-center gap-2.5">
+          <NotiLogo size="sm" />
+          <span className="font-bold text-lg">SendView</span>
         </div>
-      </header>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link href="/auth/login"><Button variant="ghost" size="sm">Entrar</Button></Link>
+          <Link href="/auth/sign-up"><Button size="sm">Empezar gratis <ArrowRight className="h-3.5 w-3.5 ml-1" /></Button></Link>
+        </div>
+      </nav>
 
-      <main>
-        <section className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Sistema de Notificaciones Centralizado para tus Aplicaciones
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            Integra un centro de notificaciones potente en minutos. API REST simple, webhooks en tiempo real y panel de
-            control completo.
-          </p>
-          <div className="flex gap-4 justify-center">
+      {/* Hero — layout asimétrico */}
+      <section className="flex-1 grid lg:grid-cols-2 gap-0 min-h-[80vh]">
+        {/* Izquierda — texto */}
+        <div className="flex flex-col justify-center px-8 md:px-16 py-20 space-y-8">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-3 py-1 w-fit">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium text-primary">API REST · Webhooks · Emails</span>
+          </div>
+
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-tight">
+              Notifica.<br />
+              <span className="text-primary">Sin complicaciones.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+              Integra SendView en minutos y empieza a enviar notificaciones a tus usuarios desde un panel de control completo.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
             <Link href="/auth/sign-up">
-              <Button size="lg">
-                Comenzar Gratis
-                <ArrowRight className="ml-2 h-4 w-4" />
+              <Button size="lg" className="gap-2 shadow-lg shadow-primary/25">
+                <Send className="h-4 w-4" />
+                Comenzar gratis
               </Button>
             </Link>
             <Link href="/docs">
-              <Button size="lg" variant="outline">
-                Ver Documentación
-              </Button>
+              <Button size="lg" variant="outline">Ver documentación</Button>
             </Link>
           </div>
-        </section>
 
-        <section className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <Zap className="h-10 w-10 mb-4 text-primary" />
-                <CardTitle>Integración Rápida</CardTitle>
-                <CardDescription>
-                  API REST intuitiva. Envía tu primera notificación en menos de 5 minutos con cualquier lenguaje de
-                  programación.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Shield className="h-10 w-10 mb-4 text-primary" />
-                <CardTitle>Seguro por Defecto</CardTitle>
-                <CardDescription>
-                  Autenticación con API Keys, políticas de seguridad a nivel de fila y webhooks verificados para máxima
-                  protección.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Code className="h-10 w-10 mb-4 text-primary" />
-                <CardTitle>Flexible y Escalable</CardTitle>
-                <CardDescription>
-                  Tipos de notificación personalizables, prioridades, datos adicionales y webhooks para integración
-                  completa.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="flex items-center gap-6 pt-2">
+            {[["API Keys", "Seguras"], ["Webhooks", "Tiempo real"], ["Emails", "Incluidos"]].map(([k, v]) => (
+              <div key={k}>
+                <p className="text-xs text-muted-foreground">{k}</p>
+                <p className="text-sm font-semibold">{v}</p>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
 
-        <section className="container mx-auto px-4 py-16">
-          <Card className="bg-primary text-primary-foreground">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl mb-4">Características Principales</CardTitle>
-            </CardHeader>
-            <CardContent className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold mb-2">API REST Completa</h3>
-                <ul className="space-y-1 text-sm opacity-90">
-                  <li>Crear, leer, actualizar y eliminar notificaciones</li>
-                  <li>Operaciones masivas (bulk)</li>
-                  <li>Estadísticas y análisis</li>
-                  <li>Filtros avanzados por usuario, tipo y estado</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Panel de Control</h3>
-                <ul className="space-y-1 text-sm opacity-90">
-                  <li>Gestión de aplicaciones integradas</li>
-                  <li>Visualización de notificaciones en tiempo real</li>
-                  <li>Estadísticas y métricas</li>
-                  <li>Configuración de webhooks</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Webhooks</h3>
-                <ul className="space-y-1 text-sm opacity-90">
-                  <li>Notificaciones en tiempo real a tu servidor</li>
-                  <li>Eventos personalizables</li>
-                  <li>Reintento automático en caso de fallo</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Tipos y Prioridades</h3>
-                <ul className="space-y-1 text-sm opacity-90">
-                  <li>Info, Success, Warning, Error</li>
-                  <li>Prioridades: Low, Normal, High, Urgent</li>
-                  <li>Datos adicionales en formato JSON</li>
-                  <li>Expiración automática de notificaciones</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+        {/* Derecha — mockup visual */}
+        <div className="hidden lg:flex items-center justify-center p-12 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10" />
+          <div className="relative z-10 w-full max-w-sm space-y-3">
+            {/* Fake notification cards */}
+            {[
+              { type: "success", title: "Pago confirmado", msg: "Tu suscripción fue renovada correctamente.", time: "Ahora" },
+              { type: "info",    title: "Nueva versión",   msg: "La versión 2.4.0 ya está disponible.",       time: "2m" },
+              { type: "warning", title: "Espacio bajo",    msg: "Tu almacenamiento está al 90%.",             time: "1h" },
+            ].map(({ type, title, msg, time }) => {
+              const dot: Record<string, string> = { success: "bg-emerald-400", info: "bg-blue-400", warning: "bg-amber-400" }
+              return (
+                <div key={title} className="bg-card/90 backdrop-blur border border-border/60 rounded-xl p-4 shadow-sm flex gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${dot[type]}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">{title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{msg}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">{time}</span>
+                </div>
+              )
+            })}
+            <div className="flex items-center justify-center gap-2 pt-3 text-xs text-muted-foreground">
+              <Activity className="h-3.5 w-3.5" />
+              3 notificaciones · 2 emails enviados
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <section className="container mx-auto px-4 py-16 text-center">
-          <h2 className="text-3xl font-bold mb-4">Listo para comenzar</h2>
-          <p className="text-muted-foreground mb-8">Crea tu cuenta gratis y comienza a integrar notificaciones hoy</p>
+      {/* Features — grid en 3 columnas sin cards iguales */}
+      <section className="border-t border-border/40 bg-card/30">
+        <div className="container mx-auto px-6 py-16">
+          <p className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-10">Por qué SendView</p>
+          <div className="grid md:grid-cols-3 gap-px bg-border/40 rounded-2xl overflow-hidden">
+            {[
+              { icon: Zap,    bg: "bg-amber-500/10",  iconColor: "text-amber-500",   title: "Integración rápida",    desc: "API REST intuitiva. Tu primera notificación en menos de 5 minutos." },
+              { icon: Shield, bg: "bg-primary/10",    iconColor: "text-primary",     title: "Seguro por defecto",    desc: "API Keys, RLS en Supabase y webhooks verificados." },
+              { icon: Code,   bg: "bg-emerald-500/10",iconColor: "text-emerald-500", title: "Flexible y escalable",  desc: "Tipos, prioridades, datos JSON y webhooks para cualquier integración." },
+            ].map(({ icon: Icon, bg, iconColor, title, desc }) => (
+              <div key={title} className={`${bg} p-8 flex flex-col gap-4`}>
+                <div className={`w-10 h-10 rounded-xl bg-card/60 flex items-center justify-center ${iconColor}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="bg-primary py-16 text-center">
+        <div className="container mx-auto px-6 space-y-6">
+          <NotiLogo size="md" className="mx-auto bg-white/20 shadow-none" />
+          <h2 className="text-3xl font-bold text-white">¿Listo para empezar?</h2>
+          <p className="text-white/70 max-w-md mx-auto text-sm">Crea tu cuenta gratis y empieza a enviar notificaciones a tus usuarios hoy mismo.</p>
           <Link href="/auth/sign-up">
-            <Button size="lg">
-              Crear Cuenta Gratuita
-              <ArrowRight className="ml-2 h-4 w-4" />
+            <Button size="lg" variant="secondary" className="gap-2 mt-2">
+              <Bell className="h-4 w-4" />
+              Crear cuenta gratuita
             </Button>
           </Link>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      <footer className="border-t mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
-          <p>Centro de Notificaciones - Sistema de gestión de notificaciones para aplicaciones</p>
+      {/* Footer */}
+      <footer className="border-t border-border/40 py-6 px-6 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <NotiLogo size="sm" />
+          <span>SendView</span>
+        </div>
+        <div className="flex gap-4">
+          <Link href="/docs" className="hover:text-foreground transition-colors">Documentación</Link>
+          <Link href="/auth/login" className="hover:text-foreground transition-colors">Iniciar sesión</Link>
         </div>
       </footer>
     </div>
