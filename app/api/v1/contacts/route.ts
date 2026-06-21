@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, email, type, message } = body
+    const { name, email, phone, type, message } = body
 
     if (!name || !email || !type || !message) {
       return NextResponse.json(
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
         app_id: application.id,
         name,
         email,
+        phone: phone || null,
         type,
         message,
       })
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
         data: {
           contact_name: name,
           contact_email: email,
+          contact_phone: phone || null,
           project_type: type,
         },
       })
