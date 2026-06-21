@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create contact" }, { status: 500, headers: corsHeaders })
     }
 
-    // Insert notification so the contact appears in the Actividad feed
-    supabase
-      .from("notifications")
-      .insert({
+    const phoneLine = phone ? `\nTeléfono: ${phone}` : ""
+
+    const [notifResult, emailContactResult, emailTeamResult] = await Promise.allSettled([
+      supabase.from("notifications").insert({
         app_id: application.id,
         user_id: email,
         title: `Nuevo contacto: ${name}`,
@@ -79,32 +79,29 @@ export async function POST(request: NextRequest) {
           contact_phone: phone || null,
           project_type: type,
         },
-      })
-      .then(({ error: notifError }) => {
-        if (notifError) console.error("[v1] Error inserting contact notification:", notifError)
-      })
+      }),
+      sendNotificationEmail({
+        to: email,
+        subject: "Gracias por contactarnos",
+        title: "Gracias por contactarnos",
+        message:
+          "Hemos recibido tu consulta y en breve uno de nuestros desarrolladores se pondrá en contacto contigo.\n\nNuestro equipo está revisando tu mensaje y te responderemos a la brevedad posible.\n\nGracias por confiar en JoFi.",
+        appName: application.name,
+        type: "info",
+      }),
+      sendNotificationEmail({
+        to: "servicejofi@gmail.com",
+        subject: `Nuevo contacto: ${name} (${type})`,
+        title: "Nuevo contacto desde el formulario",
+        message: `Nombre: ${name}\nEmail: ${email}${phoneLine}\nTipo de proyecto: ${type}\n\nMensaje:\n${message}`,
+        appName: application.name,
+        type: "info",
+      }),
+    ])
 
-    // Send confirmation email to the contact (non-blocking)
-    sendNotificationEmail({
-      to: email,
-      subject: "Gracias por contactarnos",
-      title: "Gracias por contactarnos",
-      message:
-        "Hemos recibido tu consulta y en breve uno de nuestros desarrolladores se pondrá en contacto contigo.\n\nNuestro equipo está revisando tu mensaje y te responderemos a la brevedad posible.\n\nGracias por confiar en JoFi.",
-      appName: application.name,
-      type: "info",
-    }).catch((err) => console.error("[v1] Error sending contact confirmation email:", err))
-
-    // Send internal notification to the JoFi team with full contact details (non-blocking)
-    const phoneLine = phone ? `\nTeléfono: ${phone}` : ""
-    sendNotificationEmail({
-      to: "servicejofi@gmail.com",
-      subject: `Nuevo contacto: ${name} (${type})`,
-      title: `Nuevo contacto desde el formulario`,
-      message: `Nombre: ${name}\nEmail: ${email}${phoneLine}\nTipo de proyecto: ${type}\n\nMensaje:\n${message}`,
-      appName: application.name,
-      type: "info",
-    }).catch((err) => console.error("[v1] Error sending internal contact notification:", err))
+    if (notifResult.status === "rejected") console.error("[v1] Error inserting notification:", notifResult.reason)
+    if (emailContactResult.status === "rejected") console.error("[v1] Error sending confirmation email:", emailContactResult.reason)
+    if (emailTeamResult.status === "rejected") console.error("[v1] Error sending internal email:", emailTeamResult.reason)
 
     return NextResponse.json({ success: true, contact }, { status: 201, headers: corsHeaders })
   } catch (error) {
