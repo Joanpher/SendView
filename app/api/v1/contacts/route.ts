@@ -95,6 +95,17 @@ export async function POST(request: NextRequest) {
       type: "info",
     }).catch((err) => console.error("[v1] Error sending contact confirmation email:", err))
 
+    // Send internal notification to the JoFi team with full contact details (non-blocking)
+    const phoneLine = phone ? `\nTeléfono: ${phone}` : ""
+    sendNotificationEmail({
+      to: "servicejofi@gmail.com",
+      subject: `Nuevo contacto: ${name} (${type})`,
+      title: `Nuevo contacto desde el formulario`,
+      message: `Nombre: ${name}\nEmail: ${email}${phoneLine}\nTipo de proyecto: ${type}\n\nMensaje:\n${message}`,
+      appName: application.name,
+      type: "info",
+    }).catch((err) => console.error("[v1] Error sending internal contact notification:", err))
+
     return NextResponse.json({ success: true, contact }, { status: 201, headers: corsHeaders })
   } catch (error) {
     console.error("[v1] API error:", error)
