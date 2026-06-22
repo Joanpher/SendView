@@ -180,11 +180,6 @@ export async function sendNotificationEmail(params: {
     subject: params.subject,
     text,
     html: buildHtml(params),
-    headers: {
-      "List-Unsubscribe": `<mailto:${config.user}?subject=unsubscribe>`,
-      "X-Mailer": "SendView Notifications",
-      "Precedence": "bulk",
-    },
   })
 }
 
